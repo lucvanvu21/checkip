@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import toast, { Toaster } from 'react-hot-toast';
 
 // Types
 interface CheckIPResponse {
@@ -187,7 +188,27 @@ export default function IPChecker() {
   const [result, setResult] = useState<ResultData | null>(null);
   const [error, setError] = useState<string>('');
   const [copied, setCopied] = useState<boolean>(false);
+  const [added, setAdded] = useState<boolean>(false);
 
+  const add = async () => {
+    try {
+      const response = await fetch(`https://bet.smsbet.top/add_ip.php?ip=${ip}`);
+      const data = await response.json();
+      console.log(data);
+      if (data.status === 'success') {
+        setAdded(true);
+        toast.success('Đã thêm ip vào database');
+        checkIP();
+      } else {
+        setAdded(false);
+        toast.error('Lỗi khi thêm ip');
+      }
+    } catch (err) {
+      // console.error(err);
+      toast.error('Lỗi khi thêm ip');
+      setAdded(false);
+    }
+  };
   // const checkIP = async (): Promise<void> => {
   //   if (!ip.trim()) {
   //     setError('Vui lòng nhập địa chỉ IP');
@@ -303,7 +324,7 @@ export default function IPChecker() {
     return 'High Risk';
   };
   function formatToVietnamTime(dateString: string) {
-    const date = new Date(dateString + ' UTC'); // gắn UTC để tránh lệch múi giờ
+    const date = new Date(dateString + ' UTC');
     return date.toLocaleString('vi-VN', {
       timeZone: 'Asia/Ho_Chi_Minh',
       hour12: false,
@@ -313,6 +334,7 @@ export default function IPChecker() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-950 to-slate-900 p-4 sm:p-6 lg:p-8">
       <div className="max-w-6xl mx-auto">
+        <Toaster />
         {/* Header */}
         <div className="text-center mb-8">
           {' '}
@@ -324,7 +346,6 @@ export default function IPChecker() {
           <h1 className="text-4xl font-bold text-white mb-2">IP Checker</h1>
           <p className="text-gray-400">Kiểm tra thông tin chi tiết địa chỉ IP</p>
         </div>
-
         {/* Search Box */}
         <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-2xl shadow-xl p-6 mb-8">
           <div className="flex flex-col sm:flex-row gap-3">
@@ -353,12 +374,18 @@ export default function IPChecker() {
                 'Kiểm tra'
               )}
             </button>
+            <button
+              onClick={add}
+              disabled={loading}
+              className="px-8 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-semibold rounded-xl hover:from-blue-600 hover:to-indigo-700 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none shadow-lg"
+            >
+              Thêm IP
+            </button>
           </div>
           {error && (
             <div className="mt-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm">{error}</div>
           )}
         </div>
-
         {/* Results */}
         {result && result.whoer && result.whoer.ip && (
           <div className="space-y-6">
@@ -373,13 +400,13 @@ export default function IPChecker() {
                   <Shield className={`w-6 h-6 ${result.check.status === 'exists' ? 'text-red-400' : 'text-green-400'}`} />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-white">Trạng thái ip ${ip}</h2>
+                  <h2 className="text-xl font-bold text-white">Trạng thái ip {ip}</h2>
                   <p className="text-sm text-gray-400">Kiểm tra trong cơ sở dữ liệu</p>
                 </div>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="bg-slate-900/50 border border-slate-700 rounded-xl p-4">
-                  <p className="text-sm text-gray-400 mb-1">Trạng thái ip ${ip}</p>
+                  <p className="text-sm text-gray-400 mb-1">Trạng thái ip {ip}</p>
                   <p className={`text-lg font-bold ${result.check.status === 'exists' ? 'text-red-400' : 'text-green-400'}`}>
                     {result.check.status === 'exists' ? 'Đã tồn tại' : 'Chưa tồn tại'}
                   </p>
