@@ -302,6 +302,13 @@ export default function IPChecker() {
     if (score < 60) return 'Medium Risk';
     return 'High Risk';
   };
+  function formatToVietnamTime(dateString: string) {
+    const date = new Date(dateString + ' UTC'); // gắn UTC để tránh lệch múi giờ
+    return date.toLocaleString('vi-VN', {
+      timeZone: 'Asia/Ho_Chi_Minh',
+      hour12: false,
+    });
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-950 to-slate-900 p-4 sm:p-6 lg:p-8">
@@ -379,7 +386,7 @@ export default function IPChecker() {
                 </div>
                 <div className="bg-slate-900/50 border border-slate-700 rounded-xl p-4">
                   <p className="text-sm text-gray-400 mb-1">Ngày thêm</p>
-                  <p className="text-lg font-semibold text-gray-300">{result.check.date_added || 'N/A'}</p>
+                  <p className="text-lg font-semibold text-gray-300">{formatToVietnamTime(result.check.date_added) || 'N/A'}</p>
                 </div>
                 <div className="bg-slate-900/50 border border-slate-700 rounded-xl p-4">
                   <p className="text-sm text-gray-400 mb-1">Tổng IP</p>
