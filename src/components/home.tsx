@@ -373,13 +373,13 @@ export default function IPChecker() {
                   <Shield className={`w-6 h-6 ${result.check.status === 'exists' ? 'text-red-400' : 'text-green-400'}`} />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-white">Trạng thái Database</h2>
+                  <h2 className="text-xl font-bold text-white">Trạng thái ip ${ip}</h2>
                   <p className="text-sm text-gray-400">Kiểm tra trong cơ sở dữ liệu</p>
                 </div>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="bg-slate-900/50 border border-slate-700 rounded-xl p-4">
-                  <p className="text-sm text-gray-400 mb-1">Trạng thái</p>
+                  <p className="text-sm text-gray-400 mb-1">Trạng thái ip ${ip}</p>
                   <p className={`text-lg font-bold ${result.check.status === 'exists' ? 'text-red-400' : 'text-green-400'}`}>
                     {result.check.status === 'exists' ? 'Đã tồn tại' : 'Chưa tồn tại'}
                   </p>
