@@ -22,6 +22,8 @@ import {
   Building,
   Network,
   ScrollTextIcon,
+  ClipboardPasteIcon,
+  Clipboard,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -179,7 +181,7 @@ const UserTypeBadge = ({ type }: { type: string }) => {
       break;
   }
 
-  return <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium text-white ${color}`}>{label}</span>;
+  return <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-bold text-white ${color}`}>{label}</span>;
 };
 
 export default function IPChecker() {
@@ -194,7 +196,6 @@ export default function IPChecker() {
     try {
       const response = await fetch(`https://bet.smsbet.top/add_ip.php?ip=${ip}`);
       const data = await response.json();
-      console.log(data);
       if (data.status === 'success') {
         setAdded(true);
         toast.success('Đã thêm ip vào database');
@@ -209,6 +210,7 @@ export default function IPChecker() {
       setAdded(false);
     }
   };
+
   // const checkIP = async (): Promise<void> => {
   //   if (!ip.trim()) {
   //     setError('Vui lòng nhập địa chỉ IP');
@@ -313,6 +315,7 @@ export default function IPChecker() {
   };
 
   const getFraudScoreColor = (score: number): string => {
+    console.log('Fraud score:', score);
     if (score < 30) return 'bg-green-500';
     if (score < 60) return 'bg-yellow-500';
     return 'bg-red-500';
@@ -356,9 +359,22 @@ export default function IPChecker() {
                 onChange={e => setIp(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Nhập địa chỉ IP (vd: 42.119.88.113)"
-                className="w-full px-4 py-3 pl-12 bg-slate-900/50 border-2 border-slate-700 rounded-xl text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none transition-colors"
+                className="w-full px-4 py-3 pl-12 pr-12 bg-slate-900/50 border-2 border-slate-700 rounded-xl text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none transition-colors"
               />
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
+              <button
+                onClick={async () => {
+                  try {
+                    const text = await navigator.clipboard.readText();
+                    if (text) setIp(text.trim());
+                  } catch {
+                    alert('Không thể đọc clipboard – hãy cho phép trình duyệt truy cập clipboard.');
+                  }
+                }}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-400 transition"
+                title="Dán IP từ clipboard"
+              >
+                <Clipboard className="w-5 h-5" />
+              </button>
             </div>
             <button
               onClick={checkIP}
@@ -515,7 +531,7 @@ export default function IPChecker() {
                     value={
                       <span
                         className={`px-3 py-1 ${getFraudScoreColor(
-                          result.whoer.ip.isp_score * 10
+                          result.whoer.ip.isp_score
                         )} text-white text-sm rounded-md font-medium`}
                       >
                         {result.whoer.ip.isp_score} ({getFraudScoreText(result.whoer.ip.isp_score)})
