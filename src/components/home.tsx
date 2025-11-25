@@ -376,7 +376,7 @@ export default function IPChecker() {
                 <Clipboard className="w-5 h-5" />
               </button>
             </div>
-            <div className='flex-2 flex flex-row gap-3'>
+            <div className="flex-2 flex flex-row gap-3">
               <button
                 onClick={checkIP}
                 disabled={loading}
@@ -394,7 +394,13 @@ export default function IPChecker() {
               <button
                 onClick={add}
                 disabled={loading}
-                className="flex-1 px-8 py-2 sm:py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-semibold rounded-xl hover:from-blue-600 hover:to-indigo-700 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none shadow-lg"
+                className="flex-1 px-8 py-2 sm:py-3 
+               bg-gradient-to-r from-green-500 to-emerald-600 
+               text-white font-semibold rounded-xl 
+               hover:from-green-600 hover:to-emerald-700 
+               transition-all transform hover:scale-105 
+               disabled:opacity-50 disabled:cursor-not-allowed 
+               shadow-lg"
               >
                 Thêm IP
               </button>
