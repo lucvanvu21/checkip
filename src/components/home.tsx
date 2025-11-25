@@ -346,11 +346,11 @@ export default function IPChecker() {
               <Globe className="w-8 h-8 text-white" />
             </div>
           </div>
-          <h1 className="text-4xl font-bold text-white mb-2">IP Checker</h1>
+          <h1 className="text-4xl font-bold text-white mb-2">Check IP</h1>
           <p className="text-gray-400">Kiểm tra thông tin chi tiết địa chỉ IP</p>
         </div>
         {/* Search Box */}
-        <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-2xl shadow-xl p-6 mb-8">
+        <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-2xl shadow-xl p-6 mb-8 sticky top-0 z-50 ">
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="flex-1 relative">
               <input
@@ -370,7 +370,7 @@ export default function IPChecker() {
                     alert('Không thể đọc clipboard – hãy cho phép trình duyệt truy cập clipboard.');
                   }
                 }}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-400 transition"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-400 transition p-4"
                 title="Dán IP từ clipboard"
               >
                 <Clipboard className="w-5 h-5" />
