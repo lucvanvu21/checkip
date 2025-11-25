@@ -352,14 +352,14 @@ export default function IPChecker() {
         {/* Search Box */}
         <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-2xl shadow-xl p-6 mb-8 sticky top-0 z-50 ">
           <div className="flex flex-col sm:flex-row gap-3">
-            <div className="flex-1 relative">
+            <div className="flex-3 relative">
               <input
                 type="text"
                 value={ip}
                 onChange={e => setIp(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Nhập địa chỉ IP (vd: 42.119.88.113)"
-                className="w-full px-4 py-3 pl-12 pr-12 bg-slate-900/50 border-2 border-slate-700 rounded-xl text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none transition-colors"
+                className="w-full px-4 py-2 sm:py-3 pl-12 pr-12 bg-slate-900/50 border-2 border-slate-700 rounded-xl text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none transition-colors"
               />
               <button
                 onClick={async () => {
@@ -376,27 +376,29 @@ export default function IPChecker() {
                 <Clipboard className="w-5 h-5" />
               </button>
             </div>
-            <button
-              onClick={checkIP}
-              disabled={loading}
-              className="px-8 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-semibold rounded-xl hover:from-blue-600 hover:to-indigo-700 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none shadow-lg"
-            >
-              {loading ? (
-                <span className="flex items-center gap-2">
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  Đang kiểm tra...
-                </span>
-              ) : (
-                'Kiểm tra'
-              )}
-            </button>
-            <button
-              onClick={add}
-              disabled={loading}
-              className="px-8 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-semibold rounded-xl hover:from-blue-600 hover:to-indigo-700 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none shadow-lg"
-            >
-              Thêm IP
-            </button>
+            <div className='flex-2 flex flex-row gap-3'>
+              <button
+                onClick={checkIP}
+                disabled={loading}
+                className="flex-1 px-8 py-2 sm:py-3  bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-semibold rounded-xl hover:from-blue-600 hover:to-indigo-700 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none shadow-lg"
+              >
+                {loading ? (
+                  <span className="flex items-center gap-2">
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Đang kiểm tra...
+                  </span>
+                ) : (
+                  'Kiểm tra'
+                )}
+              </button>
+              <button
+                onClick={add}
+                disabled={loading}
+                className="flex-1 px-8 py-2 sm:py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-semibold rounded-xl hover:from-blue-600 hover:to-indigo-700 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none shadow-lg"
+              >
+                Thêm IP
+              </button>
+            </div>
           </div>
           {error && (
             <div className="mt-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm">{error}</div>
