@@ -188,6 +188,9 @@ export default function IPChecker() {
   const [ip, setIp] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [result, setResult] = useState<ResultData | null>(null);
+  const [resultIpapi, setResultIpapi] = useState<IpapiData | null>(null);
+  const [resultWhoer, setResultWhoer] = useState<WhoerResponse['data'] | null>(null);
+  const [resultCheck, setResultCheck] = useState<CheckIPResponse | null>(null);
   const [error, setError] = useState<string>('');
   const [copied, setCopied] = useState<boolean>(false);
   const [added, setAdded] = useState<boolean>(false);
@@ -212,34 +215,68 @@ export default function IPChecker() {
   };
 
   // const checkIP = async (): Promise<void> => {
-  //   if (!ip.trim()) {
-  //     setError('Vui lòng nhập địa chỉ IP');
-  //     return;
-  //   }
-
-  //   const ipRegex = /^(\d{1,3}\.){3}\d{1,3}$/;
-  //   if (!ipRegex.test(ip)) {
-  //     setError('Địa chỉ IP không hợp lệ');
-  //     return;
-  //   }
-
-  //   setLoading(true);
   //   setError('');
   //   setResult(null);
+  //   setResultCheck(null);
+  //   setResultWhoer(null);
+  //   setResultIpapi(null);
+  //   setLoading(true);
+
+  //   let targetIp = ip.trim();
+
+  //   // Nếu chưa nhập IP, tự động lấy IP public của người dùng
+  //   if (!targetIp) {
+  //     try {
+  //       const res = await fetch('https://api.ipify.org?format=json');
+  //       const data = await res.json();
+  //       targetIp = data.ip;
+  //       setIp(targetIp);
+  //     } catch {
+  //       setError('Không thể lấy IP hiện tại của bạn');
+  //       setLoading(false);
+  //       return;
+  //     }
+  //   }
+
+  //   // Kiểm tra định dạng IPv4
+  //   const ipRegex = /^(\d{1,3}\.){3}\d{1,3}$/;
+  //   if (!ipRegex.test(targetIp)) {
+  //     setError('Địa chỉ IP không hợp lệ');
+  //     setLoading(false);
+  //     return;
+  //   }
 
   //   try {
-  //     const [checkResponse, whoerResponse] = await Promise.all([
-  //       fetch(`https://bet.smsbet.top/check_ip.php?ip=${ip}`),
-  //       fetch(`https://whoer.com/api_v1/index/index?language=vi-vn&ip=${ip}`),
-  //     ]);
-
+  //     const startCheck = performance.now();
+  //     const checkResponse = await fetch(`https://bet.smsbet.top/check_ip.php?ip=${targetIp}`);
   //     const checkData: CheckIPResponse = await checkResponse.json();
-  //     const whoerData: WhoerResponse = await whoerResponse.json();
+  //     const endCheck = performance.now();
+  //     console.log(`%c[CHECK DB] ${Math.round(endCheck - startCheck)} ms`, 'color: #4ade80');
 
-  //     setResult({
-  //       check: checkData,
-  //       whoer: whoerData.code === 200 ? whoerData.data : null,
-  //     });
+  //     /* ===================== API 2 ===================== */
+  //     const startWhoer = performance.now();
+  //     const whoerResponse = await fetch(`https://whoer.com/api_v1/index/index?language=vi-vn&ip=${targetIp}`);
+  //     // const whoerResponse = await fetch(`/api/whoer?ip=${targetIp}`);
+
+  //     const whoerData: WhoerResponse = await whoerResponse.json();
+  //     const endWhoer = performance.now();
+  //     console.log(`%c[WHOER] ${Math.round(endWhoer - startWhoer)} ms`, 'color: #60a5fa');
+
+  //     /* ===================== API 3 ===================== */
+  //     const startIpapi = performance.now();
+  //     const apiip = await fetch(`https://api.ipapi.is/?q=${targetIp}`);
+  //     const ipapiData: IpapiData = await apiip.json();
+  //     const endIpapi = performance.now();
+  //     console.log(`%c[IPAPI] ${Math.round(endIpapi - startIpapi)} ms`, 'color: #facc15');
+
+  //     // setResult({
+  //     //   check: checkData,
+  //     //   whoer: whoerData.data,
+  //     //   apiis: ipapiData,
+  //     // });
+  //     setResultCheck(checkData);
+  //     setResultWhoer(whoerData.code === 200 ? whoerData.data : null);
+  //     setResultIpapi(ipapiData);
   //   } catch (err) {
   //     setError('Không thể kết nối đến server. Vui lòng thử lại sau.');
   //     console.error(err);
@@ -247,58 +284,64 @@ export default function IPChecker() {
   //     setLoading(false);
   //   }
   // };
+
   const checkIP = async (): Promise<void> => {
     setError('');
-    setResult(null);
     setLoading(true);
+    setResultCheck(null);
+    setResultWhoer(null);
+    setResultIpapi(null);
 
     let targetIp = ip.trim();
 
-    // Nếu chưa nhập IP, tự động lấy IP public của người dùng
     if (!targetIp) {
-      try {
-        const res = await fetch('https://api.ipify.org?format=json');
-        const data = await res.json();
-        targetIp = data.ip;
-        setIp(targetIp);
-      } catch {
-        setError('Không thể lấy IP hiện tại của bạn');
-        setLoading(false);
-        return;
-      }
+      const res = await fetch('https://api.ipify.org?format=json');
+      const data = await res.json();
+      targetIp = data.ip;
+      setIp(targetIp);
     }
 
-    // Kiểm tra định dạng IPv4
     const ipRegex = /^(\d{1,3}\.){3}\d{1,3}$/;
     if (!ipRegex.test(targetIp)) {
-      setError('Địa chỉ IP không hợp lệ');
+      setError('IP không hợp lệ');
       setLoading(false);
       return;
     }
 
-    try {
-      const [checkResponse, whoerResponse, apiip] = await Promise.all([
-        fetch(`https://bet.smsbet.top/check_ip.php?ip=${targetIp}`),
-        fetch(`https://whoer.com/api_v1/index/index?language=vi-vn&ip=${targetIp}`),
-        fetch(`https://api.ipapi.is/?q=${targetIp}`),
-      ]);
+    /* ================= CHECK DB ================= */
+    (async () => {
+      // const start = performance.now();
+      const res = await fetch(`https://bet.smsbet.top/check_ip.php?ip=${targetIp}`);
+      const data = await res.json();
+      // console.log(`[CHECK DB] ${Math.round(performance.now() - start)} ms`);
+      setResultCheck(data); // 🔥 render ngay
+    })();
 
-      const checkData: CheckIPResponse = await checkResponse.json();
-      const whoerData: WhoerResponse = await whoerResponse.json();
-      const ipapiData: IpapiData = await apiip.json();
+    /* ================= WHOER ================= */
+    (async () => {
+      // const start = performance.now();
+      try {
+        const res = await fetch(`/api/whoer?ip=${targetIp}`);
+        const data = await res.json();
+        // console.log(`[WHOER] ${Math.round(performance.now() - start)} ms`);
+        setResultWhoer(data.code === 200 ? data.data : null);
+      } catch {
+        setResultWhoer(null);
+      }
+    })();
 
-      setResult({
-        check: checkData,
-        whoer: whoerData.code === 200 ? whoerData.data : null,
-        apiis: ipapiData,
-      });
-    } catch (err) {
-      setError('Không thể kết nối đến server. Vui lòng thử lại sau.');
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+    /* ================= IPAPI ================= */
+    (async () => {
+      // const start = performance.now();
+      const res = await fetch(`https://api.ipapi.is/?q=${targetIp}`);
+      const data = await res.json();
+      // console.log(`[IPAPI] ${Math.round(performance.now() - start)} ms`);
+      setResultIpapi(data);
+    })();
+
+    setLoading(false); // ❗ KHÔNG chờ API
   };
+
   useEffect(() => {
     checkIP();
   }, []);
@@ -411,17 +454,18 @@ export default function IPChecker() {
           )}
         </div>
         {/* Results */}
-        {result && result.whoer && result.whoer.ip && (
+        {/* {result && result.whoer && result.whoer.ip && ( */}
+        {resultCheck && (
           <div className="space-y-6">
             {/* Database Status Card */}
             <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-2xl shadow-xl p-6">
               <div className="flex items-center gap-3 mb-4">
                 <div
                   className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                    result.check.status === 'exists' ? 'bg-red-500/20' : 'bg-green-500/20'
+                    resultCheck.status === 'exists' ? 'bg-red-500/20' : 'bg-green-500/20'
                   }`}
                 >
-                  <Shield className={`w-6 h-6 ${result.check.status === 'exists' ? 'text-red-400' : 'text-green-400'}`} />
+                  <Shield className={`w-6 h-6 ${resultCheck.status === 'exists' ? 'text-red-400' : 'text-green-400'}`} />
                 </div>
                 <div>
                   <h2 className="text-xl font-bold text-white">Trạng thái ip {ip}</h2>
@@ -431,176 +475,192 @@ export default function IPChecker() {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="bg-slate-900/50 border border-slate-700 rounded-xl p-4">
                   <p className="text-sm text-gray-400 mb-1">Trạng thái ip {ip}</p>
-                  <p className={`text-lg font-bold ${result.check.status === 'exists' ? 'text-red-400' : 'text-green-400'}`}>
-                    {result.check.status === 'exists' ? 'Đã tồn tại' : 'Chưa tồn tại'}
+                  <p className={`text-lg font-bold ${resultCheck.status === 'exists' ? 'text-red-400' : 'text-green-400'}`}>
+                    {resultCheck.status === 'exists' ? 'Đã tồn tại' : 'Chưa tồn tại'}
                   </p>
                 </div>
                 <div className="bg-slate-900/50 border border-slate-700 rounded-xl p-4">
                   <p className="text-sm text-gray-400 mb-1">Ngày thêm</p>
-                  <p className="text-lg font-semibold text-gray-300">{formatToVietnamTime(result.check.date_added) || 'N/A'}</p>
+                  <p className="text-lg font-semibold text-gray-300">{formatToVietnamTime(resultCheck.date_added) || 'N/A'}</p>
                 </div>
                 <div className="bg-slate-900/50 border border-slate-700 rounded-xl p-4">
                   <p className="text-sm text-gray-400 mb-1">Tổng IP</p>
-                  <p className="text-lg font-semibold text-gray-300">{parseInt(result.check.total_ip).toLocaleString()}</p>
+                  <p className="text-lg font-semibold text-gray-300">{parseInt(resultCheck.total_ip).toLocaleString()}</p>
                 </div>
               </div>
             </div>
             {/* Main IP Card */}
-            <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-2xl shadow-xl p-8">
-              <div className="text-center mb-8">
-                <div className="inline-flex items-center gap-3 mb-4">
-                  <span className="text-4xl">🇻🇳</span>
-                  <h2 className="text-3xl font-bold text-white">
-                    My IP: {result.whoer.ip.ip}
-                    <button
-                      onClick={() => result?.whoer && copyToClipboard(result.whoer.ip.ip)}
-                      className="ml-3 inline-flex items-center justify-center w-8 h-8 rounded-lg bg-slate-700/50 hover:bg-slate-600/50 transition-colors"
-                    >
-                      {copied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4 text-gray-400" />}
-                    </button>
-                  </h2>
+            {resultWhoer && resultWhoer.ip && (
+              <>
+                <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-2xl shadow-xl p-8">
+                  <div className="text-center mb-8">
+                    <div className="inline-flex items-center gap-3 mb-4">
+                      <span className="text-4xl">🇻🇳</span>
+                      <h2 className="text-3xl font-bold text-white">
+                        My IP: {resultWhoer.ip.ip}
+                        <button
+                          onClick={() => result?.whoer && copyToClipboard(resultWhoer.ip.ip)}
+                          className="ml-3 inline-flex items-center justify-center w-8 h-8 rounded-lg bg-slate-700/50 hover:bg-slate-600/50 transition-colors"
+                        >
+                          {copied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4 text-gray-400" />}
+                        </button>
+                      </h2>
+                    </div>
+                    <div className="flex items-center justify-center gap-2 mb-3">
+                      <MapPin className="w-5 h-5 text-blue-400" />
+                      <p className="text-xl text-gray-300">
+                        {resultWhoer.ip.city || resultWhoer.ip.province} / {resultWhoer.ip.province} / {resultWhoer.ip.country}
+                      </p>
+                    </div>
+                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-500/20 rounded-full">
+                      <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                      <span className="text-green-400 font-medium">Secure internet</span>
+                    </div>
+                  </div>
+
+                  {/* Two Column Layout */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* Left Column */}
+                    <div className="space-y-4">
+                      <InfoRow icon={<Wifi className="w-5 h-5 text-blue-400" />} label="ISP:" value={resultWhoer.ip.isp} />
+                      <InfoRow
+                        icon={<Monitor className="w-5 h-5 text-gray-400" />}
+                        label="Hostname:"
+                        value={resultWhoer.ip.hostname || 'N/A'}
+                      />
+                      <InfoRow
+                        icon={<Server className="w-5 h-5 text-blue-400" />}
+                        label="OS:"
+                        value={resultWhoer.browser?.os || 'Windows 10'}
+                      />
+                      <InfoRow
+                        icon={<Globe className="w-5 h-5 text-blue-400" />}
+                        label="Browser:"
+                        value={resultWhoer.browser?.name || 'Google Chrome'}
+                      />
+                      <InfoRow
+                        icon={<Shield className="w-5 h-5 text-purple-400" />}
+                        label="Canvas:"
+                        value="oI4dWVbrTTmMoI704XTLIg=="
+                      />
+                      <InfoRow
+                        icon={<MapPin className="w-5 h-5 text-blue-400" />}
+                        label="IP type:"
+                        value={<UserTypeBadge type={resultWhoer.ip.user_type} />}
+                      />
+                    </div>
+
+                    {/* Right Column */}
+                    <div className="space-y-4">
+                      <InfoRow
+                        icon={<Server className="w-5 h-5 text-purple-400" />}
+                        label="DNS:"
+                        value={
+                          <div className="flex items-center gap-2">
+                            <span className="text-gray-300">{resultWhoer.ip.dns || 'N/A'}</span>
+                            <span className="text-sm text-gray-500">
+                              🇻🇳 {resultWhoer.ip.country}({resultWhoer.ip.iso_code})
+                            </span>
+                          </div>
+                        }
+                      />
+                      <InfoRow
+                        icon={<Shield className="w-5 h-5 text-gray-400" />}
+                        label="Proxy:"
+                        value={<StatusBadge status={!resultWhoer.ip.is_public_proxy} trueText="No" falseText="Yes" />}
+                      />
+                      <InfoRow
+                        icon={<Shield className="w-5 h-5 text-blue-400" />}
+                        label="Anonymizer:"
+                        value={<StatusBadge status={!resultWhoer.ip.is_anonymous_vpn} trueText="No" falseText="Yes" />}
+                      />
+                      <InfoRow
+                        icon={<Shield className="w-5 h-5 text-red-400" />}
+                        label="Blacklist:"
+                        value={<StatusBadge status={!resultWhoer.ip.is_route_ip_black_list} trueText="No" falseText="Yes" />}
+                      />
+                      <InfoRow
+                        icon={<Wifi className="w-5 h-5 text-green-400" />}
+                        label="Fraud score:"
+                        value={
+                          <span
+                            className={`px-3 py-1 ${getFraudScoreColor(
+                              resultWhoer.ip.isp_score
+                            )} text-white text-sm rounded-md font-medium`}
+                          >
+                            {resultWhoer.ip.isp_score} ({getFraudScoreText(resultWhoer.ip.isp_score)})
+                          </span>
+                        }
+                      />
+                      <InfoRow
+                        icon={<Server className="w-5 h-5 text-blue-400" />}
+                        label="ASN:"
+                        value={resultWhoer.ip.asn_organization}
+                      />
+                    </div>
+                  </div>
+                  <div></div>
                 </div>
-                <div className="flex items-center justify-center gap-2 mb-3">
-                  <MapPin className="w-5 h-5 text-blue-400" />
-                  <p className="text-xl text-gray-300">
-                    {result.whoer.ip.city || result.whoer.ip.province} / {result.whoer.ip.province} / {result.whoer.ip.country}
-                  </p>
+
+                <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-2xl shadow-xl p-8">
+                  <div className="text-center mb-8">
+                    <InfoRow
+                      icon={<Globe className="w-5 h-5 text-green-400" />}
+                      label="Continent:"
+                      value={`${resultWhoer.ip.continent} (${resultWhoer.ip.continent_code})`}
+                    />
+
+                    <InfoRow
+                      icon={<Server className="w-5 h-5 text-blue-400" />}
+                      label="Connection Type:"
+                      value={resultWhoer.ip.connection_type || 'N/A'}
+                    />
+
+                    <InfoRow
+                      icon={<Server className="w-5 h-5 text-purple-400" />}
+                      label="Network:"
+                      value={resultWhoer.ip.network}
+                    />
+
+                    <InfoRow
+                      icon={<Server className="w-5 h-5 text-blue-400" />}
+                      label="IP Range:"
+                      value={resultWhoer.ip.ip_range}
+                    />
+
+                    <InfoRow
+                      icon={<Globe className="w-5 h-5 text-blue-400" />}
+                      label="Timezone:"
+                      value={resultWhoer.ip.timezone}
+                    />
+
+                    <InfoRow
+                      icon={<MapPin className="w-5 h-5 text-green-400" />}
+                      label="Local Time:"
+                      value={resultWhoer.ip.local_time}
+                    />
+
+                    <InfoRow
+                      icon={<MapPin className="w-5 h-5 text-blue-400" />}
+                      label="Postal Code:"
+                      value={resultWhoer.ip.postal || 'N/A'}
+                    />
+
+                    <InfoRow
+                      icon={<Wifi className="w-5 h-5 text-gray-400" />}
+                      label="IP Version:"
+                      value={resultWhoer.ip.version === 6 ? 'IPv6' : 'IPv4'}
+                    />
+
+                    <InfoRow
+                      icon={<Shield className="w-5 h-5 text-yellow-400" />}
+                      label="Do Not Track:"
+                      value={<StatusBadge status={!resultWhoer.browser.dnt} trueText="Off" falseText="On" />}
+                    />
+                  </div>
                 </div>
-                <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-500/20 rounded-full">
-                  <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                  <span className="text-green-400 font-medium">Secure internet</span>
-                </div>
-              </div>
-
-              {/* Two Column Layout */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Left Column */}
-                <div className="space-y-4">
-                  <InfoRow icon={<Wifi className="w-5 h-5 text-blue-400" />} label="ISP:" value={result.whoer.ip.isp} />
-                  <InfoRow
-                    icon={<Monitor className="w-5 h-5 text-gray-400" />}
-                    label="Hostname:"
-                    value={result.whoer.ip.hostname || 'N/A'}
-                  />
-                  <InfoRow
-                    icon={<Server className="w-5 h-5 text-blue-400" />}
-                    label="OS:"
-                    value={result.whoer.browser?.os || 'Windows 10'}
-                  />
-                  <InfoRow
-                    icon={<Globe className="w-5 h-5 text-blue-400" />}
-                    label="Browser:"
-                    value={result.whoer.browser?.name || 'Google Chrome'}
-                  />
-                  <InfoRow
-                    icon={<Shield className="w-5 h-5 text-purple-400" />}
-                    label="Canvas:"
-                    value="oI4dWVbrTTmMoI704XTLIg=="
-                  />
-                  <InfoRow
-                    icon={<MapPin className="w-5 h-5 text-blue-400" />}
-                    label="IP type:"
-                    value={<UserTypeBadge type={result.whoer.ip.user_type} />}
-                  />
-                </div>
-
-                {/* Right Column */}
-                <div className="space-y-4">
-                  <InfoRow
-                    icon={<Server className="w-5 h-5 text-purple-400" />}
-                    label="DNS:"
-                    value={
-                      <div className="flex items-center gap-2">
-                        <span className="text-gray-300">{result.whoer.ip.dns || 'N/A'}</span>
-                        <span className="text-sm text-gray-500">
-                          🇻🇳 {result.whoer.ip.country}({result.whoer.ip.iso_code})
-                        </span>
-                      </div>
-                    }
-                  />
-                  <InfoRow
-                    icon={<Shield className="w-5 h-5 text-gray-400" />}
-                    label="Proxy:"
-                    value={<StatusBadge status={!result.whoer.ip.is_public_proxy} trueText="No" falseText="Yes" />}
-                  />
-                  <InfoRow
-                    icon={<Shield className="w-5 h-5 text-blue-400" />}
-                    label="Anonymizer:"
-                    value={<StatusBadge status={!result.whoer.ip.is_anonymous_vpn} trueText="No" falseText="Yes" />}
-                  />
-                  <InfoRow
-                    icon={<Shield className="w-5 h-5 text-red-400" />}
-                    label="Blacklist:"
-                    value={<StatusBadge status={!result.whoer.ip.is_route_ip_black_list} trueText="No" falseText="Yes" />}
-                  />
-                  <InfoRow
-                    icon={<Wifi className="w-5 h-5 text-green-400" />}
-                    label="Fraud score:"
-                    value={
-                      <span
-                        className={`px-3 py-1 ${getFraudScoreColor(
-                          result.whoer.ip.isp_score
-                        )} text-white text-sm rounded-md font-medium`}
-                      >
-                        {result.whoer.ip.isp_score} ({getFraudScoreText(result.whoer.ip.isp_score)})
-                      </span>
-                    }
-                  />
-                  <InfoRow
-                    icon={<Server className="w-5 h-5 text-blue-400" />}
-                    label="ASN:"
-                    value={result.whoer.ip.asn_organization}
-                  />
-                </div>
-              </div>
-              <div></div>
-            </div>
-
-            <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-2xl shadow-xl p-8">
-              <div className="text-center mb-8">
-                <InfoRow
-                  icon={<Globe className="w-5 h-5 text-green-400" />}
-                  label="Continent:"
-                  value={`${result.whoer.ip.continent} (${result.whoer.ip.continent_code})`}
-                />
-
-                <InfoRow
-                  icon={<Server className="w-5 h-5 text-blue-400" />}
-                  label="Connection Type:"
-                  value={result.whoer.ip.connection_type || 'N/A'}
-                />
-
-                <InfoRow icon={<Server className="w-5 h-5 text-purple-400" />} label="Network:" value={result.whoer.ip.network} />
-
-                <InfoRow icon={<Server className="w-5 h-5 text-blue-400" />} label="IP Range:" value={result.whoer.ip.ip_range} />
-
-                <InfoRow icon={<Globe className="w-5 h-5 text-blue-400" />} label="Timezone:" value={result.whoer.ip.timezone} />
-
-                <InfoRow
-                  icon={<MapPin className="w-5 h-5 text-green-400" />}
-                  label="Local Time:"
-                  value={result.whoer.ip.local_time}
-                />
-
-                <InfoRow
-                  icon={<MapPin className="w-5 h-5 text-blue-400" />}
-                  label="Postal Code:"
-                  value={result.whoer.ip.postal || 'N/A'}
-                />
-
-                <InfoRow
-                  icon={<Wifi className="w-5 h-5 text-gray-400" />}
-                  label="IP Version:"
-                  value={result.whoer.ip.version === 6 ? 'IPv6' : 'IPv4'}
-                />
-
-                <InfoRow
-                  icon={<Shield className="w-5 h-5 text-yellow-400" />}
-                  label="Do Not Track:"
-                  value={<StatusBadge status={!result.whoer.browser.dnt} trueText="Off" falseText="On" />}
-                />
-              </div>
-            </div>
+              </>
+            )}
             <div className="mt-8 p-6 rounded-2xl bg-gray-900/60 backdrop-blur-lg border border-gray-700 shadow-lg">
               <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
                 <Server className="w-6 h-6 text-blue-400" />
@@ -621,54 +681,50 @@ export default function IPChecker() {
                   <div className="grid sm:grid-cols-2 gap-4">
                     <InfoRow
                       label="Country"
-                      value={result?.apiis?.location.country}
+                      value={resultIpapi?.location?.country || ''}
                       icon={<Globe className="w-5 h-5 text-blue-400" />}
                     />
                     <InfoRow
                       label="State"
-                      value={result?.apiis?.location.state}
+                      value={resultIpapi?.location.state}
                       icon={<MapPin className="w-5 h-5 text-gray-400" />}
                     />
                     <InfoRow
                       label="City"
-                      value={result?.apiis?.location.city}
+                      value={resultIpapi?.location.city}
                       icon={<MapPin className="w-5 h-5 text-yellow-400" />}
                     />
-                    <InfoRow
-                      label="ZIP"
-                      value={result?.apiis?.location.zip}
-                      icon={<Server className="w-5 h-5 text-gray-400" />}
-                    />
+                    <InfoRow label="ZIP" value={resultIpapi?.location.zip} icon={<Server className="w-5 h-5 text-gray-400" />} />
                     <InfoRow
                       label="Timezone"
-                      value={result?.apiis?.location.timezone}
+                      value={resultIpapi?.location.timezone}
                       icon={<Clock className="w-5 h-5 text-green-400" />}
                     />
                     <InfoRow
                       label="Local Time"
-                      value={result?.apiis?.location.local_time}
+                      value={resultIpapi?.location.local_time}
                       icon={<Clock className="w-5 h-5 text-purple-400" />}
                     />
                   </div>
                 </div>
                 {/* Group 1 - IP Info */}
                 <div className="grid sm:grid-cols-2 gap-4 mb-6">
-                  <InfoRow icon={<Globe className="w-5 h-5 text-blue-400" />} label="IP Address" value={result?.apiis?.ip} />
-                  <InfoRow icon={<Server className="w-5 h-5 text-purple-400" />} label="RIR" value={result?.apiis?.rir} />
+                  <InfoRow icon={<Globe className="w-5 h-5 text-blue-400" />} label="IP Address" value={resultIpapi?.ip} />
+                  <InfoRow icon={<Server className="w-5 h-5 text-purple-400" />} label="RIR" value={resultIpapi?.rir} />
                   <InfoRow
                     icon={<Shield className="w-5 h-5 text-green-400" />}
                     label="Company Type"
-                    value={<CompanyTypeBadge type={result?.apiis?.company.type || ''} />}
+                    value={<CompanyTypeBadge type={resultIpapi?.company.type || ''} />}
                   />
                   <InfoRow
                     icon={<Shield className="w-5 h-5 text-orange-400" />}
                     label="Proxy / VPN / Tor"
-                    value={result?.apiis?.is_proxy || result?.apiis?.is_vpn || result?.apiis?.is_tor ? 'Yes' : 'No'}
+                    value={resultIpapi?.is_proxy || resultIpapi?.is_vpn || resultIpapi?.is_tor ? 'Yes' : 'No'}
                   />
                   <InfoRow
                     icon={<Server className="w-5 h-5 text-gray-400" />}
                     label="Datacenter"
-                    value={result?.apiis?.is_datacenter ? 'Yes' : 'No'}
+                    value={resultIpapi?.is_datacenter ? 'Yes' : 'No'}
                   />
                 </div>
 
@@ -682,27 +738,27 @@ export default function IPChecker() {
                     <InfoRow
                       icon={<Building className="w-5 h-5 text-indigo-400" />}
                       label="Name"
-                      value={`${result?.apiis?.company.name} (${result?.apiis?.company.domain})`}
+                      value={`${resultIpapi?.company.name} (${resultIpapi?.company.domain})`}
                     />
                     <InfoRow
                       icon={<Network className="w-5 h-5 text-blue-400" />}
                       label="Network Range"
-                      value={result?.apiis?.company.network}
+                      value={resultIpapi?.company.network}
                     />
                     <InfoRow
                       icon={<Server className="w-5 h-5 text-green-400" />}
                       label="ASN"
-                      value={`AS${result?.apiis?.asn.asn} (${result?.apiis?.asn.org})`}
+                      value={`AS${resultIpapi?.asn.asn} (${resultIpapi?.asn.org})`}
                     />
                     <InfoRow
                       icon={<MailCheck className="w-5 h-5 text-red-400" />}
                       label="route"
-                      value={result?.apiis?.asn?.route}
+                      value={resultIpapi?.asn?.route}
                     />
                     <InfoRow
                       icon={<PhoneCall className="w-5 h-5 text-green-400" />}
                       label="update"
-                      value={result?.apiis?.asn?.updated}
+                      value={resultIpapi?.asn?.updated}
                     />
                     <InfoRow
                       icon={<ScrollTextIcon className="w-5 h-5 text-green-400" />}
@@ -710,11 +766,11 @@ export default function IPChecker() {
                       value={
                         <span
                           className={`px-3 py-1 ${getFraudScoreColor(
-                            result?.apiis?.asn.abuser_score ? parseInt(result?.apiis?.asn.abuser_score) : 0
+                            resultIpapi?.asn.abuser_score ? parseInt(resultIpapi?.asn.abuser_score) : 0
                           )} text-white text-sm rounded-md font-medium`}
                         >
-                          {result?.apiis?.asn.abuser_score} (
-                          {getFraudScoreText(result?.apiis?.asn.abuser_score ? parseInt(result?.apiis?.asn.abuser_score) : 0)})
+                          {resultIpapi?.asn.abuser_score} (
+                          {getFraudScoreText(resultIpapi?.asn.abuser_score ? parseInt(resultIpapi?.asn.abuser_score) : 0)})
                         </span>
                       }
                     />
