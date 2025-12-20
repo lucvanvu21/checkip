@@ -321,7 +321,7 @@ export default function IPChecker() {
     (async () => {
       // const start = performance.now();
       try {
-        const res = await fetch(`/api/whoer?ip=${targetIp}`);
+        const res = await fetch(`https://whoer.com/api_v1/index/index?language=vi-VN&ip=${targetIp}`);
         const data = await res.json();
         // console.log(`[WHOER] ${Math.round(performance.now() - start)} ms`);
         setResultWhoer(data.code === 200 ? data.data : null);
