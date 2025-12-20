@@ -324,6 +324,7 @@ export default function IPChecker() {
         const res = await fetch(`https://whoer.com/api_v1/index/index?language=vi-VN&ip=${targetIp}`);
         const data = await res.json();
         // console.log(`[WHOER] ${Math.round(performance.now() - start)} ms`);
+        setLoading(false);
         setResultWhoer(data.code === 200 ? data.data : null);
       } catch {
         setResultWhoer(null);
@@ -350,6 +351,7 @@ export default function IPChecker() {
       checkIP();
     }
   };
+  console.log('ResultWhoer:', loading);
 
   const copyToClipboard = (text: string): void => {
     navigator.clipboard.writeText(text);
@@ -490,6 +492,16 @@ export default function IPChecker() {
               </div>
             </div>
             {/* Main IP Card */}
+            {!resultWhoer && (
+              <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-2xl shadow-xl p-8">
+                <div className="text-center">
+                  <div className="flex items-center justify-center gap-2 mb-4">
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <span className="text-white text-lg font-medium">Đang tải dữ liệu...</span>
+                  </div>
+                </div>
+              </div>
+            )}
             {resultWhoer && resultWhoer.ip && (
               <>
                 <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-2xl shadow-xl p-8">
