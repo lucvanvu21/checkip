@@ -311,7 +311,7 @@ export default function IPChecker() {
     /* ================= CHECK DB ================= */
     (async () => {
       // const start = performance.now();
-      const res = await fetch(`https://bet.smsbet.top/check_ip.php?ip=${targetIp}`);
+      const res = await fetch(`/api/check-ip?ip=${targetIp}`);
       const data = await res.json();
       // console.log(`[CHECK DB] ${Math.round(performance.now() - start)} ms`);
       setResultCheck(data); // 🔥 render ngay
